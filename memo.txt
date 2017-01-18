@@ -1,0 +1,10 @@
+
+
+decibel 계산(BASE를 1로 수정하여 사용) - http://www.programering.com/a/MDNzcDMwATY.html
+range seeker 사용 - https://github.com/syedowaisali/crystal-range-seekbar
+	project build.gradle에 아래 추가 후
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+	25.0.1 sdk 설치
+
+외부 라이브러리 추가 방법 - http://ggari.tistory.com/422

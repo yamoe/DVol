@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="256dp"
+    android:background="#303030"
+    android:gravity="center"
+    >
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="256dp"
+        android:gravity="center"
+        >
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_launcher"
+                android:id="@+id/imageView"
+                />
+        </LinearLayout>
+        <ImageButton
+            android:scaleType="fitXY"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/img_start"
+            android:background="@android:color/transparent"
+            android:id="@+id/noti_big_start_button"
+            />
+        <ImageButton
+            android:scaleType="fitXY"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/img_exit"
+            android:background="@android:color/transparent"
+            android:id="@+id/noti_big_exit_button"
+            />
+
+    </LinearLayout>
+</LinearLayout>
