@@ -60,8 +60,8 @@ public class AutoVolumeService extends Service {
         Log.d(TAG, "onCreate @@@@@@@@@@@@@@@@@@@@");
 
         max_volume_ = volume_.getMax();
-        //step_amplitude_ = DecibelMeter.MAX_AMPLITUDE / max_volume_;
-        step_amplitude_ = 1000;
+        step_amplitude_ = DecibelMeter.MAX_AMPLITUDE / max_volume_;
+        //step_amplitude_ = 1000;
         standard_volume_ = volume_.getCurrent(); // 임의 설정한 기본값
 
         decibel_meter_.init();
