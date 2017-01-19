@@ -9,21 +9,16 @@ import android.widget.Toast;
 
 public class ElapsedToast {
     private int mMessageID;
-    private int mMsec;
+    private int mBufferMsec = 2000;
     private long mPreviousToastedTime = 0;
 
     public ElapsedToast(int id) {
-        this(id, 2000);
-    }
-
-    private ElapsedToast(int id, int msec) {
         mMessageID = id;
-        mMsec = msec;
     }
 
     public void show(Context context) {
         long now = System.currentTimeMillis();
-        if ((now - mPreviousToastedTime) > mMsec) {
+        if ((now - mPreviousToastedTime) > mBufferMsec) {
             mPreviousToastedTime = now;
             Toast.makeText(context, context.getResources().getString(mMessageID), Toast.LENGTH_SHORT).show();
         }
