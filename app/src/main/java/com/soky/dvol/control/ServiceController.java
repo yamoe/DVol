@@ -13,52 +13,60 @@ import java.util.HashSet;
 
 public class ServiceController {
     private final String TAG = this.getClass().getSimpleName();
-    private AutoVolumeService service_ = null;
-    private HashSet<AutoVolumeService.ServiceCallback> wait_callbacks_ =  new HashSet<AutoVolumeService.ServiceCallback>();
+    private AutoVolumeService mService = null;
+    private HashSet<AutoVolumeService.ServiceCallback> mWaitingCallbacks =  new HashSet<>();
 
-    public boolean isRunning() {
-        return (service_ != null);
+    /**
+     * 서비스 실행 여부
+     * @return 서비스 실행 여부
+     */
+    boolean isRunning() {
+        return (mService != null);
     }
 
+    /**
+     * 서비스의 자동 볼륨 조절 실행 여부
+     * @return 서비스의 자동 볼륨 조절 실행 여부
+     */
     public boolean isStartedAutoVolume() {
-        if (!isRunning()) return false;
-        return service_.isStartedAutoVolume();
+        return isRunning() && mService.isStartedAutoVolume();
     }
 
     public AutoVolumeService getService() {
-        if (service_ == null) {
+        if (mService == null) {
+            // 서비스가 실행된 후 호출될 수 있어야 함
             throw new RuntimeException("service is not running @@@@@@@@@@");
         }
-        return service_;
+        return mService;
     }
 
-    public void start() {
-        if (service_ != null) return;
+    void start() {
+        if (mService != null) return;
 
         MainApplication app = Controller.getApplication();
         Intent intent = new Intent(app.getApplicationContext(), AutoVolumeService.class);
         app.bindService(intent, service_connection_, Context.BIND_AUTO_CREATE);
     }
 
-    public void stop() {
-        if (service_ == null) return;
+    void stop() {
+        if (mService == null) return;
 
         MainApplication app = Controller.getApplication();
         app.unbindService(service_connection_);
-        service_ = null;
+        mService = null;
     }
 
     public void registCallback(AutoVolumeService.ServiceCallback cb) {
         if (isRunning()) {
-            service_.registerCallback(cb);
+            mService.registerCallback(cb);
         } else {
-            wait_callbacks_.add(cb);
+            mWaitingCallbacks.add(cb);
         }
     }
 
     public void unregistCallback(AutoVolumeService.ServiceCallback cb) {
         if (isRunning()) {
-            service_.unregisterCallback(cb);
+            mService.unregisterCallback(cb);
         }
     }
 
@@ -66,16 +74,16 @@ public class ServiceController {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             AutoVolumeService.LocalBinder binder = (AutoVolumeService.LocalBinder)service;
-            service_ = binder.getService();
-            for (AutoVolumeService.ServiceCallback cb : wait_callbacks_) {
-                service_.registerCallback(cb);
+            mService = binder.getService();
+            for (AutoVolumeService.ServiceCallback cb : mWaitingCallbacks) {
+                mService.registerCallback(cb);
             }
-            wait_callbacks_.clear();
+            mWaitingCallbacks.clear();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0){
-            service_ = null;
+            mService = null;
         }
     };
 

@@ -29,27 +29,29 @@ import com.soky.dvol.util.ElapsedToast;
 import static com.soky.dvol.control.Controller.getServiceController;
 
 public class MainActivity extends AppCompatActivity {
-    private final String TAG = this.getClass().getSimpleName();
+    public final String TAG = this.getClass().getSimpleName();
 
+    // 안드로이드 권한 요청 결과 코드(임의 지정)
     private final int PERM_RECORD_AUDIO_REQUEST_CODE = 100;
 
-    private Volume volume_;
-    private ElapsedToast uncheck_toast_;
-    private ElapsedToast stop_toast_;
-    private BackButtonExiter back_button_exiter_;
-    private ResidentNotification noti_;
+    private Volume mVolume;
+    private ElapsedToast mUnckeckToast;
+    private ElapsedToast mStopToast;
+    private BackButtonExiter mBackButtonExiter;
+    private ResidentNotification mNotification;
 
-    private TextView status_decibel_textview_;
-    private SeekBar status_decibel_range_seekbar_;
-    private TextView status_volume_textview_;
-    private SeekBar status_volume_range_seekbar_;
+    private TextView mStatusDecibelTextView;
+    private SeekBar mStatusDecibelSeekBar;
+    private TextView mStatusVolumeTextView;
+    private SeekBar mStatusVolumeSeekBar;
 
-    private CheckBox control_use_now_;
-    private TextView control_decibel_textview_;
-    private SeekBar control_decibel_range_seekbar_;
-    private TextView control_volume_textview_;
-    private SeekBar control_volume_range_seekbar_;
-    private ImageButton start_button_;
+    private CheckBox mControlUseNow;
+
+    private TextView mControlDecibelTextView;
+    private SeekBar mControlDecibelSeekBar;
+    private TextView mControlVolumeTextView;
+    private SeekBar mControlVolumeSeekBar;
+    private ImageButton mStartButton;
 
 
 
@@ -63,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
             Resources res = getResources();
             String str = String.format(res.getString(R.string.decibel_status), decibel, amplitude);
 
-            status_decibel_textview_.setText(str);
-            status_decibel_range_seekbar_.setProgress(decibel);
+            mStatusDecibelTextView.setText(str);
+            mStatusDecibelSeekBar.setProgress(decibel);
 
-            if (control_use_now_.isChecked()) {
+            if (mControlUseNow.isChecked()) {
                 if (!isStartedAutoVolume()) {
                     setControlDecibelWidget(decibel, true);
                 }
@@ -81,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
      *  onRequestPermissionsResult 메소드에서 사용자가 선택한 권한 허용 여부를 전달 받음
      */
     private void requestPermission() {
-        int has_permission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
-        if (has_permission != PackageManager.PERMISSION_GRANTED) {
+        int hasPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
+        if (hasPermission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO}, PERM_RECORD_AUDIO_REQUEST_CODE);
         }
     }
@@ -118,42 +120,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initComponent() {
-        volume_ = new Volume();
-        uncheck_toast_ = new ElapsedToast(this, R.string.set_uncheck);
-        stop_toast_ = new ElapsedToast(this, R.string.set_stop);
-        back_button_exiter_ = new BackButtonExiter();
-        noti_ = new ResidentNotification(this.getClass());
-        noti_.start();
+        mVolume = new Volume();
+        mUnckeckToast = new ElapsedToast(R.string.set_uncheck);
+        mStopToast = new ElapsedToast(R.string.set_stop);
+        mBackButtonExiter = new BackButtonExiter();
+        mNotification = new ResidentNotification(this.getClass());
+        mNotification.start();
     }
 
     private void initStatusWidgets() {
 
-        status_decibel_textview_ = (TextView)findViewById(R.id.status_decibel_textview);
-        status_decibel_range_seekbar_ = (SeekBar)findViewById(R.id.status_decibel_range_seekbar);
-        status_volume_textview_ = (TextView)findViewById(R.id.status_volume_textview);
-        status_volume_range_seekbar_ = (SeekBar)findViewById(R.id.status_volume_range_seekbar);
+        mStatusDecibelTextView = (TextView)findViewById(R.id.status_decibel_textview);
+        mStatusDecibelSeekBar = (SeekBar)findViewById(R.id.status_decibel_range_seekbar);
+        mStatusVolumeTextView = (TextView)findViewById(R.id.status_volume_textview);
+        mStatusVolumeSeekBar = (SeekBar)findViewById(R.id.status_volume_range_seekbar);
 
-        status_decibel_range_seekbar_.setMax(DecibelMeter.MAX_DECIBEL);
-        status_decibel_range_seekbar_.setOnTouchListener(new SeekBar.OnTouchListener(){
+        mStatusDecibelSeekBar.setMax(DecibelMeter.MAX_DECIBEL);
+        mStatusDecibelSeekBar.setOnTouchListener(new SeekBar.OnTouchListener(){
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;    // ReadOnly
             }
         });
-        status_volume_range_seekbar_.setMax(volume_.getMax());
-        status_volume_range_seekbar_.setProgress(volume_.getCurrent());
-        status_volume_range_seekbar_.setOnTouchListener(new SeekBar.OnTouchListener(){
+        mStatusVolumeSeekBar.setMax(mVolume.getMax());
+        mStatusVolumeSeekBar.setProgress(mVolume.getCurrent());
+        mStatusVolumeSeekBar.setOnTouchListener(new SeekBar.OnTouchListener(){
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;    // ReadOnly
             }
         });
 
-        volume_.registerListener(new Volume.Listener() {
+        // 기기의 MUSIC 볼륨이 변경될때마다 콜백
+        mVolume.registerListener(new Volume.Listener() {
             @Override
             public void onChange(int volume) {
-                status_volume_textview_.setText(String.valueOf(volume));
-                status_volume_range_seekbar_.setProgress(volume);
+                mStatusVolumeTextView.setText(String.valueOf(volume));
+                mStatusVolumeSeekBar.setProgress(volume);
             }
         });
 
@@ -161,31 +164,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void initControlWidgets() {
 
-        control_use_now_ = (CheckBox)findViewById(R.id.now_checkbox);
-        control_use_now_.setChecked(Config.getUseNow());
+        mControlUseNow = (CheckBox)findViewById(R.id.now_checkbox);
+        mControlUseNow.setChecked(Config.getUseNow());
 
-        control_decibel_textview_ = (TextView)findViewById(R.id.control_decibel_textview);
-        control_decibel_range_seekbar_ = (SeekBar)findViewById(R.id.control_decibel_range_seekbar);
-        control_volume_textview_ = (TextView)findViewById(R.id.control_volume_textview);
-        control_volume_range_seekbar_ = (SeekBar)findViewById(R.id.control_volume_range_seekbar);
+        mControlDecibelTextView = (TextView)findViewById(R.id.control_decibel_textview);
+        mControlDecibelSeekBar = (SeekBar)findViewById(R.id.control_decibel_range_seekbar);
+        mControlVolumeTextView = (TextView)findViewById(R.id.control_volume_textview);
+        mControlVolumeSeekBar = (SeekBar)findViewById(R.id.control_volume_range_seekbar);
 
-        control_decibel_range_seekbar_.setMax(DecibelMeter.MAX_DECIBEL);
+        mControlDecibelSeekBar.setMax(DecibelMeter.MAX_DECIBEL);
         setControlDecibelWidget(Config.getDecibel(), true);
 
-        control_decibel_range_seekbar_.setOnTouchListener(new SeekBar.OnTouchListener(){
+        mControlDecibelSeekBar.setOnTouchListener(new SeekBar.OnTouchListener(){
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (isStartedAutoVolume()) {
-                    stop_toast_.show();
+                    mStopToast.show(v.getContext());
                     return true;    // ReadOnly
-                } else  if (control_use_now_.isChecked()) {
-                    uncheck_toast_.show();
+                } else  if (mControlUseNow.isChecked()) {
+                    mUnckeckToast.show(v.getContext());
                     return true;    // ReadOnly
                 }
                 return false;
             }
         });
-        control_decibel_range_seekbar_.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mControlDecibelSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 setControlDecibelWidget(progress, false);
@@ -198,18 +201,18 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        control_volume_range_seekbar_.setOnTouchListener(new SeekBar.OnTouchListener(){
+        mControlVolumeSeekBar.setOnTouchListener(new SeekBar.OnTouchListener(){
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (isStartedAutoVolume()) {
-                    stop_toast_.show();
+                    mStopToast.show(v.getContext());
                     return true;    // ReadOnly
                 }
                 return false;
             }
         });
 
-        control_volume_range_seekbar_.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mControlVolumeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 setControlVolumeWidget(progress, false);
@@ -222,11 +225,11 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        control_volume_range_seekbar_.setMax(volume_.getMax());
+        mControlVolumeSeekBar.setMax(mVolume.getMax());
         setControlVolumeWidget(Config.getVolume(), true);
 
-        start_button_ = (ImageButton)findViewById(R.id.start_button);
-        start_button_.setOnClickListener(new View.OnClickListener() {
+        mStartButton = (ImageButton)findViewById(R.id.start_button);
+        mStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Controller.switchAutoVolume();
@@ -235,44 +238,44 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startAutoVolume() {
-        control_use_now_.setEnabled(false);
-        start_button_.setImageResource(R.drawable.img_stop);
-        noti_.changeStarted();
+        mControlUseNow.setEnabled(false);
+        mStartButton.setImageResource(R.drawable.img_stop);
+        mNotification.changeStarted();
 
-        int volume = control_volume_range_seekbar_.getProgress();
-        int decibel = control_decibel_range_seekbar_.getProgress();
+        int volume = mControlVolumeSeekBar.getProgress();
+        int decibel = mControlDecibelSeekBar.getProgress();
         int amplitude = DecibelMeter.toAmplitude(decibel);
 
         // 자동 볼륨 시작시 마다 설정 저장
         Config.setDecibel(decibel);
         Config.setVolume(volume);
-        Config.setUseNow(control_use_now_.isChecked());
+        Config.setUseNow(mControlUseNow.isChecked());
 
         AutoVolumeService service = getServiceController().getService();
         service.startControlVolume(volume, amplitude);
     }
 
     public void stopAutoVolume() {
-        control_use_now_.setEnabled(true);
-        start_button_.setImageResource(R.drawable.img_start);
-        noti_.changeStopped();
+        mControlUseNow.setEnabled(true);
+        mStartButton.setImageResource(R.drawable.img_start);
+        mNotification.changeStopped();
 
         AutoVolumeService service = getServiceController().getService();
         service.stopControlVolume();
     }
 
 
-    private void setControlDecibelWidget(int decibel, boolean prog) {
-        control_decibel_textview_.setText(String.format(getResources().getString(R.string.decibel_simple_status), decibel));
-        if (prog) {
-            control_decibel_range_seekbar_.setProgress(decibel);
+    private void setControlDecibelWidget(int decibel, boolean withProgress) {
+        mControlDecibelTextView.setText(String.format(getResources().getString(R.string.decibel_simple_status), decibel));
+        if (withProgress) {
+            mControlDecibelSeekBar.setProgress(decibel);
         }
     }
 
-    private void setControlVolumeWidget(int volume, boolean prog) {
-        control_volume_textview_.setText(String.valueOf(volume));
-        if (prog) {
-            control_volume_range_seekbar_.setProgress(volume);
+    private void setControlVolumeWidget(int volume, boolean withProgress) {
+        mControlVolumeTextView.setText(String.valueOf(volume));
+        if (withProgress) {
+            mControlVolumeSeekBar.setProgress(volume);
         }
     }
 
@@ -299,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.d(TAG, "onDestroy !!!!!!!!!!!!!!!!!!!!!!!");
         super.onDestroy();
-        volume_.unregisterListener();
+        mVolume.unregisterListener();
     }
 
 
@@ -308,14 +311,14 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed() {
-        back_button_exiter_.exit(this);
+        mBackButtonExiter.exit(this);
     }
 
     /**
      * Controller.exit() 사용시 호출됨
      */
     public void exit() {
-        noti_.cancel();
+        mNotification.cancel();
 
         if (Build.VERSION.SDK_INT >= 16) {
             finishAffinity();
@@ -330,8 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 서비스의 자동 볼륨 조절 기능이 동작중인지 확인. (축약하려고 만든 메소드임)
-     * 서비스 자체가 동작하는지와는 다름
-     * @return
+     * @return 자동 볼륨 조절 기능 동작 여부
      */
     private boolean isStartedAutoVolume() {
         return getServiceController().isStartedAutoVolume();

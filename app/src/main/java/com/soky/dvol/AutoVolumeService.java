@@ -13,22 +13,22 @@ import com.soky.dvol.util.PeriodLooper;
 import java.util.HashSet;
 
 public class AutoVolumeService extends Service {
-    private final String TAG = this.getClass().getSimpleName();
-    private final IBinder binder_ = new LocalBinder();
-    private HashSet<ServiceCallback> callbacks_ = new HashSet<ServiceCallback>();
+    public final String TAG = this.getClass().getSimpleName();
 
-    private Volume volume_ = new Volume();;
-    private DecibelMeter decibel_meter_ = new DecibelMeter();
-    private PeriodLooper looper_ = new PeriodLooper();
-    private int loop_msec_ = 1000;
+    private final IBinder mBinder = new LocalBinder();
+    private HashSet<ServiceCallback> mCallbacks = new HashSet<>();
 
-    private int max_volume_;        // 안드로이드의 최대 볼륨(기기마다 다름)
-    public int standard_volume_;    // 사용자가 설정하는 기준 볼륨
-    public int standard_amplitude_;
-    private int step_amplitude_;
+    private Volume mVolume = new Volume();
+    private DecibelMeter mDecibelMeter = new DecibelMeter();
+    private PeriodLooper mLooper = new PeriodLooper();
+    private int mLoopMsec = 1000;        // 몇초마다 Loop 를 실행시킬지 지정
 
+    private int mMaxVolume;              // 안드로이드의 최대 볼륨(기기마다 다름)
+    private int mStandardVolume;        // 사용자가 설정하는 기준 볼륨
+    private int mStandardAmplitude;     // 사용자가 설정하는 기준 진폭
+    private int mStepAmplitude;          // 볼륨 조정을 위한 진폭 단위
 
-    private boolean is_started_ = false;    // 자동 볼륨 조절 시작 여부
+    private boolean mIsStarted = false;    // 자동 볼륨 조절 시작 여부
 
 
     /**
@@ -51,7 +51,7 @@ public class AutoVolumeService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind @@@@@@@@@@@@@@@@@@@@");
-        return binder_;
+        return mBinder;
     }
 
     @Override
@@ -59,13 +59,11 @@ public class AutoVolumeService extends Service {
         super.onCreate();
         Log.d(TAG, "onCreate @@@@@@@@@@@@@@@@@@@@");
 
-        max_volume_ = volume_.getMax();
-        step_amplitude_ = DecibelMeter.MAX_AMPLITUDE / max_volume_;
-        //step_amplitude_ = 1000;
-        standard_volume_ = volume_.getCurrent(); // 임의 설정한 기본값
+        mMaxVolume = mVolume.getMax();
+        mStepAmplitude = DecibelMeter.MAX_AMPLITUDE / mMaxVolume;   //mStepAmplitude = 1000;
 
-        decibel_meter_.init();
-        looper_.start(loop_, loop_msec_);
+        mDecibelMeter.initialize();
+        mLooper.start(loop_, mLoopMsec);
     }
 
     @Override
@@ -73,42 +71,45 @@ public class AutoVolumeService extends Service {
         super.onDestroy();
         Log.d(TAG, "onDestroy @@@@@@@@@@@@@@@@@@@@");
 
-        looper_.stop();
-        decibel_meter_.uninit();
+        mLooper.stop();
+        mDecibelMeter.uninit();
     }
 
 
+    /**
+     * 서비스에서 주기적인 작업
+     */
     private Runnable loop_ = new Runnable() {
         @Override
         public void run() {
 
-            decibel_meter_.measure();
-            int amplitude = decibel_meter_.getAmplitude();
-            int decibel = decibel_meter_.getDecibel();
-            int new_volume = volume_.getCurrent();
+            mDecibelMeter.measure();
+            int amplitude = mDecibelMeter.getAmplitude();
+            int decibel = mDecibelMeter.getDecibel();
+            int newVolume = mVolume.getCurrent();
 
-            if (is_started_) {
+            if (mIsStarted) {
                 /*
                     볼륨 조절
                     decibel은 log 함수라 선형 값인 amplitude(진폭)으로 바로 계산함.
-                    설정된 기준 진폭(standard_amplitude_) 와 현재 진폭의 차를 구한후
-                    조절할 볼륨 양을 계산한후 설정된 기준 볼륨(standard_volume_)에 가감.
+                    설정된 기준 진폭(mStandardAmplitude) 와 현재 진폭의 차를 구한후
+                    조절할 볼륨 양을 계산한후 설정된 기준 볼륨(mStandardVolume)에 가감.
                  */
 
-                int diff_amp = standard_amplitude_ - amplitude;
-                int inc = diff_amp / step_amplitude_;
-                new_volume = standard_volume_ - inc;
+                int diffAmplitude = mStandardAmplitude - amplitude;
+                int inc = diffAmplitude / mStepAmplitude;
+                newVolume = mStandardVolume - inc;
 
-                if (new_volume < 1) new_volume = 1;
-                if (new_volume > max_volume_) new_volume = max_volume_;
+                if (newVolume < 1) newVolume = 1;
+                if (newVolume > mMaxVolume) newVolume = mMaxVolume;
 
-                volume_.setCurrent(new_volume);
-//                Log.d(TAG, "@@@@@@@@@@@ standard_amplitude_ : " + standard_amplitude_ + ", step_amplitude_ : " + step_amplitude_);
+                mVolume.setCurrent(newVolume);
+//                Log.d(TAG, "@@@@@@@@@@@ mStandardAmplitude : " + mStandardAmplitude + ", mStepAmplitude : " + mStepAmplitude);
 //                Log.d(TAG, "@@@@@@@@@@@ " + decibel + " dB (" + amplitude + "), new_volume : " + new_volume +", diff_amp : " + diff_amp + ", inc : " + inc);
             }
 
-            for (ServiceCallback cb : callbacks_) {
-                cb.onResult(decibel, amplitude, new_volume);
+            for (ServiceCallback cb : mCallbacks) {
+                cb.onResult(decibel, amplitude, newVolume);
             }
 
 
@@ -116,33 +117,33 @@ public class AutoVolumeService extends Service {
     };
 
     public void registerCallback(ServiceCallback cb) {
-        callbacks_.add(cb);
+        mCallbacks.add(cb);
     }
 
     public void unregisterCallback(ServiceCallback cb) {
-        callbacks_.remove(cb);
+        mCallbacks.remove(cb);
     }
 
     public void startControlVolume(int volume, int amplitude) {
-        standard_volume_ = volume;
-        standard_amplitude_ = amplitude;
-        is_started_ = true;
+        mStandardVolume = volume;
+        mStandardAmplitude = amplitude;
+        mIsStarted = true;
     }
 
     public void stopControlVolume() {
-        is_started_ = false;
+        mIsStarted = false;
     }
 
     public boolean isStartedAutoVolume() {
-        return is_started_;
+        return mIsStarted;
     }
 
     public int getAmplitude() {
-        return decibel_meter_.getAmplitude();
+        return mDecibelMeter.getAmplitude();
     }
 
     public int getDecibel() {
-        return decibel_meter_.getDecibel();
+        return mDecibelMeter.getDecibel();
     }
 
     @Override

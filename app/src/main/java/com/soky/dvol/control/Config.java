@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
  */
 
 public class Config {
+    public final String TAG = this.getClass().getSimpleName();
+
     private static final int DEFAULT_DECIBEL = 35;
     private static final int DEFAULT_VOLUME = 6;
 
@@ -29,7 +31,7 @@ public class Config {
     public static void setDecibel(int v) {
         SharedPreferences.Editor editor = pref().edit();
         editor.putInt(DECIBEL, v);
-        editor.commit();
+        editor.apply();
     }
 
     public static int getVolume() {
@@ -41,7 +43,7 @@ public class Config {
     public static void setVolume(int v) {
         SharedPreferences.Editor editor = pref().edit();
         editor.putInt(VOLUME, v);
-        editor.commit();
+        editor.apply();
     }
 
     public static boolean getUseNow() {
@@ -51,7 +53,7 @@ public class Config {
     public static void setUseNow(boolean v) {
         SharedPreferences.Editor editor = pref().edit();
         editor.putBoolean(USE_NOW, v);
-        editor.commit();
+        editor.apply();
     }
 
 }

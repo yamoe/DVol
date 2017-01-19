@@ -4,44 +4,44 @@ import android.os.Handler;
 
 public class PeriodLooper {
 
-    private final Handler handler_ = new Handler();
-    private boolean is_running_ = false;
-    private int period_msec_ = 0;
+    private final Handler mHandler = new Handler();
+    private boolean mIsRunning = false;
+    private int mPeriodMesc = 0;
+    private Runnable mUserLoop;
 
-    private Runnable user_loop_;
-    private Runnable main_loop_ = new Runnable() {
+    private Runnable mMainLoop = new Runnable() {
         @Override
         public void run() {
-            if (!is_running_) {
+            if (!mIsRunning) {
                 return;
             }
 
-            user_loop_.run();
+            mUserLoop.run();
 
-            if (is_running_) {
+            if (mIsRunning) {
                 post();
             }
         }
     };
 
-    public void start(Runnable user_loop, int period_msec) {
-        user_loop_ = user_loop;
-        period_msec_ = period_msec;
+    public void start(Runnable userLoop, int periodMsec) {
+        mUserLoop = userLoop;
+        mPeriodMesc = periodMsec;
 
-        if (!is_running_) {
-            is_running_ = true;
+        if (!mIsRunning) {
+            mIsRunning = true;
             post();
         }
     }
 
     public void stop() {
-        if (is_running_) {
-            is_running_ = false;
+        if (mIsRunning) {
+            mIsRunning = false;
         }
     }
 
     private void post() {
-        handler_.postDelayed(main_loop_, period_msec_);
+        mHandler.postDelayed(mMainLoop, mPeriodMesc);
     }
 
 

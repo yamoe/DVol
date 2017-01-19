@@ -1,7 +1,6 @@
 package com.soky.dvol.control;
 
 import android.media.MediaRecorder;
-import android.os.Handler;
 import android.util.Log;
 
 /*
@@ -26,52 +25,51 @@ public class DecibelMeter {
     public final static int MAX_DECIBEL = 120;  // 임의로 120을 MAX로 함
     public final static int MAX_AMPLITUDE = 32767;
 
-    private MediaRecorder recorder_ = null;
-    private final Handler handler_ = new Handler();
+    private MediaRecorder mRecorder = null;
 
-    private int decibel_ = 0;
-    private int amplitude_ = 0;
+    private int mDecibel = 0;
+    private int mAmplitude = 0;
 
-    public void init() {
-        if (recorder_ != null) return;
+    public void initialize() {
+        if (mRecorder != null) return;
 
         try {
-            recorder_ = new MediaRecorder();
-            recorder_.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder_.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder_.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder_.setOutputFile("/dev/null");
+            mRecorder = new MediaRecorder();
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mRecorder.setOutputFile("/dev/null");
 
-            recorder_.prepare();
-            recorder_.start();
+            mRecorder.prepare();
+            mRecorder.start();
 
         } catch (Exception e) {
-            // IOException, IllegalStateException 발생 가능
+            // 다른 앱이 마이크 권한을 점유하고 있는 경우IOException, IllegalStateException 발생 가능
             Log.d(TAG, e.getMessage());
-            recorder_ = null;
+            mRecorder = null;
         }
     }
 
     public void uninit() {
-        if (recorder_ != null) {
-            recorder_.stop();
-            recorder_.reset();
-            recorder_.release();
-            recorder_ = null;
+        if (mRecorder != null) {
+            mRecorder.stop();
+            mRecorder.reset();
+            mRecorder.release();
+            mRecorder = null;
         }
     }
 
     public void measure() {
-        amplitude_ = measureAmplitude();
-        decibel_ = measureDecibel(amplitude_);
+        mAmplitude = measureAmplitude();
+        mDecibel = measureDecibel(mAmplitude);
     }
 
     public int getDecibel() {
-        return decibel_;
+        return mDecibel;
     }
 
     public int getAmplitude() {
-        return amplitude_;
+        return mAmplitude;
     }
 
     public static int toAmplitude(int decibel) {
@@ -79,21 +77,21 @@ public class DecibelMeter {
     }
 
     private int measureAmplitude() {
-        init();
+        initialize();
 
-        if (recorder_ == null) {
+        if (mRecorder == null) {
             return 0;
         }
         /* getMaxAmplitude() 설명
             MAX_AMPLITUDE : 최대값 32767 (90.308... 데시벨)
             호출간격 사이의 최대 진폭이므로 연속으로 호출되면 대부분 0 을 리턴함
          */
-        return recorder_.getMaxAmplitude();
+        return mRecorder.getMaxAmplitude();
     }
 
     private int measureDecibel(int amp) {
         int decibel = 0;
-        amp = amp / 1; //BASE 600, 300
+        //amp = amp / 1; //BASE 600, 300
         if (amp > 1) {
             decibel = (int)(20 * Math.log10(amp));
         }

@@ -8,23 +8,24 @@ import android.widget.Toast;
  */
 
 public class ElapsedToast {
-    private Toast toast_;
-    private int msec_;
-    private long previous_toasted_time_ = 0;
+    private int mMessageID;
+    private int mMsec;
+    private long mPreviousToastedTime = 0;
 
-    public ElapsedToast(Context c, int id) {
-        this(c, id, 2000);
+    public ElapsedToast(int id) {
+        this(id, 2000);
     }
 
-    public ElapsedToast(Context c, int id, int msec) {
-        toast_ = Toast.makeText(c, c.getResources().getString(id), Toast.LENGTH_SHORT);
+    private ElapsedToast(int id, int msec) {
+        mMessageID = id;
+        mMsec = msec;
     }
 
-    public void show() {
+    public void show(Context context) {
         long now = System.currentTimeMillis();
-        if ((now - previous_toasted_time_) > msec_) {
-            previous_toasted_time_ = now;
-            toast_.show();
+        if ((now - mPreviousToastedTime) > mMsec) {
+            mPreviousToastedTime = now;
+            Toast.makeText(context, context.getResources().getString(mMessageID), Toast.LENGTH_SHORT).show();
         }
     }
 }
