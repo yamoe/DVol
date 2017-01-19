@@ -1,6 +1,7 @@
 package com.soky.dvol;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Build;
@@ -8,8 +9,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
@@ -25,6 +29,7 @@ import com.soky.dvol.control.ResidentNotification;
 import com.soky.dvol.control.Volume;
 import com.soky.dvol.util.BackButtonExiter;
 import com.soky.dvol.util.ElapsedToast;
+import com.soky.dvol.util.ProjectInfo;
 
 import static com.soky.dvol.control.Controller.getServiceController;
 
@@ -337,5 +342,52 @@ public class MainActivity extends AppCompatActivity {
      */
     private boolean isStartedAutoVolume() {
         return getServiceController().isStartedAutoVolume();
+    }
+
+    /**
+     * 커스텀 액션바 등록
+     * @param menu 메뉴
+     * @return 성공 여부
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.action_bar, menu);
+        return true;
+    }
+
+    /**
+     * 액션바의 버튼 클릭 시 콜백
+     * @param item 아이템
+     * @return 성공 여부
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.actionbar_info) {
+
+            // 액션바 Info 버튼 클릭 시 버전 정보 Dialog
+            String msg = "";
+            msg += "Version Code : " + ProjectInfo.getVersionCode(this);
+            msg += "\n";
+            msg += "Version Name : " + ProjectInfo.getVersionName(this);
+
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle(" ");
+            dialog.setMessage(msg);
+            dialog.setIcon(R.drawable.dvol_icon_noti);
+            dialog.setPositiveButton("CLOSE", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            //dialog.setCancelable(false); // (뒤로 버튼 클릭시 | Dialog 바깐 클릭시) 창 닫히지 않게 함
+            dialog.show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
