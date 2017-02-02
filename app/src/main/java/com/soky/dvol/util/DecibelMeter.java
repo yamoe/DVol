@@ -1,4 +1,4 @@
-package com.soky.dvol.control;
+package com.soky.dvol.util;
 
 import android.media.MediaRecorder;
 import android.util.Log;
@@ -19,7 +19,7 @@ import android.util.Log;
     10 dB	겨우 무엇인가 들린다	나뭇잎 스치는 소리
     0 dB	겨우 무엇인가 들린다	들을 수 있는 가장 작은 소리
  */
-public class DecibelMeter {
+public class DecibelMeter implements DecibelMeterInterface {
     private final String TAG = this.getClass().getSimpleName();
 
     public final static int MAX_DECIBEL = 120;  // 임의로 120을 MAX로 함
@@ -30,6 +30,7 @@ public class DecibelMeter {
     private int mDecibel = 0;
     private int mAmplitude = 0;
 
+    @Override
     public void initialize() {
         if (mRecorder != null) return;
 
@@ -50,7 +51,8 @@ public class DecibelMeter {
         }
     }
 
-    public void uninit() {
+    @Override
+    public void uninitialize() {
         if (mRecorder != null) {
             mRecorder.stop();
             mRecorder.reset();
@@ -59,15 +61,18 @@ public class DecibelMeter {
         }
     }
 
+    @Override
     public void measure() {
         mAmplitude = measureAmplitude();
         mDecibel = measureDecibel(mAmplitude);
     }
 
+    @Override
     public int getDecibel() {
         return mDecibel;
     }
 
+    @Override
     public int getAmplitude() {
         return mAmplitude;
     }

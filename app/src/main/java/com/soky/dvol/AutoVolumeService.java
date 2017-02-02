@@ -6,9 +6,11 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.soky.dvol.control.DecibelMeter;
-import com.soky.dvol.control.Volume;
+import com.soky.dvol.util.AverageDecibelMeter;
+import com.soky.dvol.util.DecibelMeter;
+import com.soky.dvol.util.DecibelMeterInterface;
 import com.soky.dvol.util.PeriodLooper;
+import com.soky.dvol.util.Volume;
 
 import java.util.HashSet;
 
@@ -19,7 +21,7 @@ public class AutoVolumeService extends Service {
     private HashSet<ServiceCallback> mCallbacks = new HashSet<>();
 
     private Volume mVolume = new Volume();
-    private DecibelMeter mDecibelMeter = new DecibelMeter();
+    private DecibelMeterInterface mDecibelMeter = new AverageDecibelMeter(10);
     private PeriodLooper mLooper = new PeriodLooper();
     private int mLoopMsec = 1000;        // 몇초마다 Loop 를 실행시킬지 지정
 
@@ -72,7 +74,7 @@ public class AutoVolumeService extends Service {
         Log.d(TAG, "onDestroy @@@@@@@@@@@@@@@@@@@@");
 
         mLooper.stop();
-        mDecibelMeter.uninit();
+        mDecibelMeter.uninitialize();
     }
 
 

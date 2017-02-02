@@ -1,9 +1,11 @@
-package com.soky.dvol.control;
+package com.soky.dvol.util;
 
 import android.content.Context;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.os.Handler;
+
+import com.soky.dvol.control.Controller;
 
 /**
  * 볼륨 컨트롤 관련 클래스
@@ -18,7 +20,7 @@ public class Volume {
 
     public Volume() {
         Context context = Controller.getApplication().getApplicationContext();
-        mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
     }
 

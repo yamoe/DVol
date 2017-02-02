@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
  *
  */
 
-public class Config {
+public class Configuration {
     public final String TAG = this.getClass().getSimpleName();
 
     private static final int DEFAULT_DECIBEL = 35;

@@ -22,11 +22,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.soky.dvol.control.Config;
+import com.soky.dvol.control.Configuration;
 import com.soky.dvol.control.Controller;
-import com.soky.dvol.control.DecibelMeter;
+import com.soky.dvol.util.DecibelMeter;
 import com.soky.dvol.control.ResidentNotification;
-import com.soky.dvol.control.Volume;
+import com.soky.dvol.util.Volume;
 import com.soky.dvol.util.BackButtonExiter;
 import com.soky.dvol.util.ElapsedToast;
 import com.soky.dvol.util.ProjectInfo;
@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     private void initControlWidgets() {
 
         mControlUseNow = (CheckBox)findViewById(R.id.now_checkbox);
-        mControlUseNow.setChecked(Config.getUseNow());
+        mControlUseNow.setChecked(Configuration.getUseNow());
 
         mControlDecibelTextView = (TextView)findViewById(R.id.control_decibel_textview);
         mControlDecibelSeekBar = (SeekBar)findViewById(R.id.control_decibel_range_seekbar);
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         mControlVolumeSeekBar = (SeekBar)findViewById(R.id.control_volume_range_seekbar);
 
         mControlDecibelSeekBar.setMax(DecibelMeter.MAX_DECIBEL);
-        setControlDecibelWidget(Config.getDecibel(), true);
+        setControlDecibelWidget(Configuration.getDecibel(), true);
 
         mControlDecibelSeekBar.setOnTouchListener(new SeekBar.OnTouchListener(){
             @Override
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mControlVolumeSeekBar.setMax(mVolume.getMax());
-        setControlVolumeWidget(Config.getVolume(), true);
+        setControlVolumeWidget(Configuration.getVolume(), true);
 
         mStartButton = (ImageButton)findViewById(R.id.start_button);
         mStartButton.setOnClickListener(new View.OnClickListener() {
@@ -252,9 +252,9 @@ public class MainActivity extends AppCompatActivity {
         int amplitude = DecibelMeter.toAmplitude(decibel);
 
         // 자동 볼륨 시작시 마다 설정 저장
-        Config.setDecibel(decibel);
-        Config.setVolume(volume);
-        Config.setUseNow(mControlUseNow.isChecked());
+        Configuration.setDecibel(decibel);
+        Configuration.setVolume(volume);
+        Configuration.setUseNow(mControlUseNow.isChecked());
 
         AutoVolumeService service = getServiceController().getService();
         service.startControlVolume(volume, amplitude);
