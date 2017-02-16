@@ -1,7 +1,6 @@
 package com.soky.dvol.util;
 
 import android.media.MediaRecorder;
-import android.util.Log;
 
 /*
     dB		느낌					소리의 종류
@@ -46,7 +45,7 @@ public class DecibelMeter implements DecibelMeterInterface {
 
         } catch (Exception e) {
             // 다른 앱이 마이크 권한을 점유하고 있는 경우IOException, IllegalStateException 발생 가능
-            Log.d(TAG, e.getMessage());
+            // Log.d(TAG, e.getMessage());
             mRecorder = null;
         }
     }

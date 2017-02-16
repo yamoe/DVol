@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.soky.dvol.util.AverageDecibelMeter;
 import com.soky.dvol.util.DecibelMeter;
@@ -52,14 +51,12 @@ public class AutoVolumeService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "onBind @@@@@@@@@@@@@@@@@@@@");
         return mBinder;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate @@@@@@@@@@@@@@@@@@@@");
 
         mMaxVolume = mVolume.getMax();
         mStepAmplitude = DecibelMeter.MAX_AMPLITUDE / mMaxVolume;   //mStepAmplitude = 1000;
@@ -71,7 +68,6 @@ public class AutoVolumeService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy @@@@@@@@@@@@@@@@@@@@");
 
         mLooper.stop();
         mDecibelMeter.uninitialize();
@@ -106,8 +102,6 @@ public class AutoVolumeService extends Service {
                 if (newVolume > mMaxVolume) newVolume = mMaxVolume;
 
                 mVolume.setCurrent(newVolume);
-//                Log.d(TAG, "@@@@@@@@@@@ mStandardAmplitude : " + mStandardAmplitude + ", mStepAmplitude : " + mStepAmplitude);
-//                Log.d(TAG, "@@@@@@@@@@@ " + decibel + " dB (" + amplitude + "), new_volume : " + new_volume +", diff_amp : " + diff_amp + ", inc : " + inc);
             }
 
             for (ServiceCallback cb : mCallbacks) {
@@ -150,13 +144,11 @@ public class AutoVolumeService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(TAG, "onUnbind @@@@@@@@@@@@@@@@@@@@");
         return super.onUnbind(intent);
     }
 
     @Override
     public void onRebind(Intent intent) {
-        Log.d(TAG, "onRebind @@@@@@@@@@@@@@@@@@@@");
         super.onRebind(intent);
     }
 }
